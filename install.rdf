@@ -6,23 +6,25 @@
     <RDF:Description
         RDF:about="urn:mozilla:install-manifest"
         em:id="zotero-memento@tran.org"
-        em:name="Zotero Memento"
-        em:version="1.0.0"
+        em:name="Zotero Memento and RobustLinks"
+        em:version="2.0.0"
         em:type="2"
-        em:creator="Leon Tran"
-        em:description="Plugin for archiving saved resources"
-        em:homepageURL="https://github.com/leonkt/zotero-memento"
+        em:creator="Shawn M. Jones"
+        em:description="Plugin for archiving saved resources and creating Robust Links"
+        em:homepageURL="https://mementoweb.org"
         em:updateURL="">
         <em:type>2</em:type>
         <em:targetApplication>
             <Description>
-                <em:id>zotero@chnm.gmu.edu</em:id>
-                <em:minVersion>5.0</em:minVersion>
-                <em:maxVersion>5.*</em:maxVersion>
+              <!-- Zotero -->
+              <em:id>zotero@chnm.gmu.edu</em:id>
+              <em:minVersion>5.0</em:minVersion>
+              <em:maxVersion>5.*</em:maxVersion>
             </Description>
         </em:targetApplication>
         <em:targetApplication>
           <Description>
+            <!-- Juris-M Word for Windows Zotero Integration -->
             <em:id>juris-m@juris-m.github.io</em:id>
             <em:minVersion>5.0</em:minVersion>
             <em:maxVersion>5.*</em:maxVersion>
