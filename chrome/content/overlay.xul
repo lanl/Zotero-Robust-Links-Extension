@@ -5,41 +5,17 @@
     id="zotero_memento"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <link rel="shortcut icon" type="image/png" href="jasmine/lib/jasmine-3.4.0/jasmine_favicon.png"></link>
-    <link rel="stylesheet" type="text/css" href="jasmine/lib/jasmine-3.4.0/jasmine.css"></link>
-
-    
-    
-
-    <script type="text/javascript" src="chrome://zotero/content/include.js"/>  
-    <script type="text/javascript" src="chrome://zotero_memento/content/scripts/Signpost.js"/>
-    <script type="text/javascript" src="chrome://zotero_memento/content/scripts/IaPusher.js"/>
     <script type="text/javascript" src="chrome://zotero_memento/content/scripts/ZoteroArchive.js"/>
-    <script type="text/javascript" src="chrome://zotero_memento/content/scripts/ArchivePusher.js"/>
-    
-    <script type="text/javascript" src="jasmine/lib/jasmine-3.4.0/jasmine.js"></script>
-    <script type="text/javascript" src="jasmine/lib/jasmine-3.4.0/jasmine-html.js"></script>
-    <script type="text/javascript" src="jasmine/lib/jasmine-3.4.0/boot.js"></script>
+    <script type="text/javascript" src="chrome://zotero_memento/content/scripts/RobustLinksCreator.js"></script>
 
-    <!-- <menupopup id="menu_FilePopup">
-    <menuseparator/>
-      <menu label="Export Library with Archived Versions">
-        <menupopup>
-          <menuitem id="mla-exporter"label="Text (MLA)"/>
-          <menuitem id="bibtex-exporter" label="BibTex"/>
-          <menuitem id="snippet-exporter"  label="HTML Snippet"/>
-        </menupopup>
-      </menu>
-    </menupopup>-->
     <popup id="zotero-itemmenu">
       <menu class="menu-iconic" id="zotero-itemmenu-zoteroshortdoi-menu" label="Archive this Resource">
         <menupopup>
-          <menuitem label="Internet Archive" oncommand="Zotero.IaPusher.sendReq()"/>
-          <menuitem label="Archive.is" oncommand="Zotero.ArchivePusher.sendReq()"/>
+          <menuitem label="Any Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink(null)"/>
+          <menuitem label="Internet Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.org')"/>
+          <menuitem label="Archive.Today" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.today')"/>
         </menupopup>
       </menu>
     </popup>
-
-
 
 </overlay>

@@ -11,10 +11,13 @@ Zotero.Memento = {
   // Callback implementing the notify() method to pass to the Notifier
   notifierCallback: {
     notify: function(event, type, id, extraData) {
+      console.log("fired event " + event);
       var item = Zotero.Items.get(id);
+
+      // 'add' is easier to control - 'modify' is triggered by too many actions
+      // if ( (event == 'add') || (event == 'modify') ) {
       if (event == 'add') {
-        var reqText = Zotero.IaPusher.sendReq();
-        Zotero.Signpost.signpostEntry(reqText);
+        Zotero.RobustLinksCreator.makeRobustLink(null);
       }
     }
   }

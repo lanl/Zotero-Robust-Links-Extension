@@ -1,7 +1,7 @@
 {
 	"translatorID": "f0c6f80b-1689-45e3-a598-138e3f65d53e",
 	"translatorType": 2,
-	"label": "HTML Snippet",
+	"label": "Robust Link",
 	"creator": "Leon Tran",
 	"target": "txt",
 	"minVersion": "1.0.*",
