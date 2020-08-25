@@ -126,7 +126,17 @@ Zotero.RobustLinksCreator = {
         errorNotifWindow.startCloseTimer(5000);
     },
 
-    makeRobustLink : function(archive_name) {
+    makeRobustLink : function(archive_name, item) {
+
+        console.log("starting makeRobustLink");
+
+        if (item === null) {
+            var pane = Zotero.getActiveZoteroPane();
+            var selectedItems = pane.getSelectedItems();
+            var item = selectedItems[0];
+        }
+
+        var url = item.getField('url');
 
         var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
 
@@ -139,11 +149,6 @@ Zotero.RobustLinksCreator = {
         errorNotifWindow.changeHeadline(notice);
         errorNotifWindow.show();
         errorNotifWindow.startCloseTimer(3000);
-
-        var pane = Zotero.getActiveZoteroPane();
-        var selectedItems = pane.getSelectedItems();
-        var item = selectedItems[0];
-        var url = item.getField('url');
 
         if (this.checkValidUrl(url)) {
             if (!this.isArchived(item)) {

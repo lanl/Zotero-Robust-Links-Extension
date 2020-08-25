@@ -5,15 +5,15 @@
     id="zotero_memento"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <script type="text/javascript" src="chrome://zotero_memento/content/scripts/ZoteroArchive.js"/>
+    <script type="text/javascript" src="chrome://zotero_memento/content/scripts/ZoteroRobustLinks.js"/>
     <script type="text/javascript" src="chrome://zotero_memento/content/scripts/RobustLinksCreator.js"></script>
 
     <popup id="zotero-itemmenu">
       <menu class="menu-iconic" id="zotero-itemmenu-zoteroshortdoi-menu" label="Archive this Resource">
         <menupopup>
-          <menuitem label="Any Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink(null)"/>
-          <menuitem label="Internet Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.org')"/>
-          <menuitem label="Archive.Today" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.today')"/>
+          <menuitem label="Any Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink(null, null)"/>
+          <menuitem label="Internet Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.org', null)"/>
+          <menuitem label="Archive.Today" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.today', null)"/>
         </menupopup>
       </menu>
     </popup>

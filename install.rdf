@@ -5,13 +5,13 @@
     xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
     <RDF:Description
         RDF:about="urn:mozilla:install-manifest"
-        em:id="zotero-memento@tran.org"
+        em:id="zotero-robustlinks@mementoweb.org"
         em:name="Zotero Robust Links"
         em:version="2.0.0"
         em:type="2"
         em:creator="Shawn M. Jones"
         em:description="Plugin for archiving saved resources and creating Robust Links"
-        em:homepageURL="https://mementoweb.org"
+        em:homepageURL="https://robustlinks.mementoweb.org"
         em:updateURL="">
         <em:type>2</em:type>
         <em:targetApplication>
