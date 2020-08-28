@@ -129,6 +129,7 @@ Zotero.RobustLinksCreator = {
     makeRobustLink : function(archive_name, item) {
 
         console.log("starting makeRobustLink");
+        var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
 
         if (item === null) {
             var pane = Zotero.getActiveZoteroPane();
@@ -136,9 +137,39 @@ Zotero.RobustLinksCreator = {
             var item = selectedItems[0];
         }
 
+        console.log("item.itemTypeID is " + item.itemTypeID);
+
         var url = item.getField('url');
 
-        var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
+        console.log("url is " + url);
+
+        if (item.itemTypeID == 2){
+            notice = "Refusing to archive attachment";
+            errorNotifWindow.changeHeadline(notice);
+            errorNotifWindow.show();
+            errorNotifWindow.startCloseTimer(3000);
+            errorNotifWindow.changeHeadline(notice);
+            return;
+        }
+
+        if ( item.itemTypeID == 26) {
+            notice = "Refusing to archive note";
+            errorNotifWindow.changeHeadline(notice);
+            errorNotifWindow.show();
+            errorNotifWindow.startCloseTimer(3000);
+            errorNotifWindow.changeHeadline(notice);
+            return;
+        }
+
+        if (url == "") {
+            console.log("no URL field, returning...");
+            notice = "Refusing to archive blank URL";
+            errorNotifWindow.changeHeadline(notice);
+            errorNotifWindow.show();
+            errorNotifWindow.startCloseTimer(3000);
+            errorNotifWindow.changeHeadline(notice);
+            return;
+        }
 
         if (archive_name === null) {
             notice = "submitting url " + url + " to any web archive";

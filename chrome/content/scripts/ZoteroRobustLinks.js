@@ -12,6 +12,10 @@ Zotero.RobustLinks = {
   notifierCallback: {
     notify: function(event, type, ids, extraData) {
       console.log("fired event " + event + " for id " + ids);
+      console.log("type:");
+      console.log(type);
+      console.log("extraData:");
+      console.log(extraData);
       var items = Zotero.Items.get(ids);
 
       // 'add' is easier to control - 'modify' is triggered by too many actions
@@ -19,6 +23,8 @@ Zotero.RobustLinks = {
       if (event == 'add') {      
 
         for(item of items) {
+
+          console.log("item is of type " + item.itemTypeID);
 
           // we don't work with attachments (2) or notes (26)
           if (item.itemTypeID != 2 && item.itemTypeID != 26) {
