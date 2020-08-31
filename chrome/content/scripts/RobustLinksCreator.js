@@ -1,3 +1,12 @@
+const getMethods = (obj) => {
+    let properties = new Set()
+    let currentObj = obj
+    do {
+      Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
+    } while ((currentObj = Object.getPrototypeOf(currentObj)))
+    return [...properties.keys()].filter(item => typeof obj[item] === 'function')
+  }
+
 Zotero.RobustLinksCreator = {
 
     /*
@@ -9,19 +18,15 @@ Zotero.RobustLinksCreator = {
      */
 
     isArchived : function(item) {
-        console.log("isArchived was called...");
-        for (i in item.getTags()) {
-            console.log("checking tag " + i );
+        Zotero.debug("isArchived was called...");
 
-            tagval = item.getTags()[i]["tag"];
-
-            console.log("get tag " + item.getTags()[i]["tag"]);
-
-            if (tagval == "archived") {
+        for(var attid of item.getAttachments()) {
+            attachment = Zotero.Items.get(attid);
+            if (attachment.getField('title') == 'Robust Link') {
                 return true;
             }
-
         }
+
         return false;
       },
 
@@ -44,12 +49,20 @@ Zotero.RobustLinksCreator = {
         return true;
       },
 
+    issueNotice: function(notice, timeout) {
+        var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
+
+        errorNotifWindow.changeHeadline(notice);
+        errorNotifWindow.show();
+        errorNotifWindow.startCloseTimer(timeout);
+    },
+
     /*
     * Displays appropriate status window if there is an error, fills in URI-M otherwise.
     * 
     */
     call_robust_link_api: function(url, archive, item) {
-        var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
+        
         var notice = "";
 
         // api_url = "https://www.shawnmjones.org";
@@ -60,41 +73,53 @@ Zotero.RobustLinksCreator = {
         }
         
         var xhr = new XMLHttpRequest();
+        // var xhr = new Object();
         xhr.open("GET", api_url, false);
-        console.log("with xhr, sending " + url + " to " + api_url);
+        Zotero.debug("with xhr, sending " + url + " to " + api_url);
         xhr.send();
 
-        console.log("extracting RL response and responding ourselves appropriately...");
+        Zotero.debug("extracting RL response and responding ourselves appropriately...");
+
+        xhr.status = 200;
+
+        Zotero.debug("xhr.status is now " + xhr.status);
 
         switch(xhr.status) {
         case 200:
             notice = "Success! Note contains archived link.";
 
-            // create note with Robust Link
-            var note = new Zotero.Item('note'); 
-            // noteText = "Version URL: " + robust_link;
             jdata = JSON.parse(xhr.responseText);
-            noteText = "Robust Links Data - DO NOT DELETE\n" + xhr.responseText;
-            // TODO: replace < and > in noteText with &lt; and &gt;
-            note.setNote(noteText); 
-            note.parentID = item.id;
-            note.saveTx();
+            Zotero.debug("creating new attachment with " + jdata["data-originalurl"]);
+            Zotero.debug("item.id is " + item.id);
+            attachments = item.getAttachments();
+            Zotero.debug("there are " + attachments.length + " attachments");
 
-            var note = new Zotero.Item('note');
-            noteText = "Robust Link HTML\n" + jdata["robust_links_html"]["original_url_as_href"].replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-            note.setNote(noteText); 
-            note.parentID = item.id;
-            note.saveTx();
+            var attachmentPromise = Zotero.Attachments.linkFromURL({
+                url: jdata["data-originalurl"],
+                parentItemID: item.id,
+                title: "Robust Link"
+            });
 
-            var note = new Zotero.Item('note');
-            noteText = "URI-M: " + jdata["data-versionurl"];
-            note.setNote(noteText); 
-            note.parentID = item.id;
-            note.saveTx();
+            Zotero.debug("created attachmentPromise...");
+            Zotero.debug(attachmentPromise);
+
+            attachmentPromise.then((item) => {
+                // Zotero.debug(value);
+                // Zotero.debug("methods?");
+                // Zotero.debug( getMethods(value) );
+                Zotero.debug("successful creation of attachment with id: " + item.id);
+                item.setNote(JSON.stringify(jdata));
+                item.saveTx();
+            },
+            (reason) => {
+                Zotero.debug("Robust Links failure?");
+                Zotero.debug(reason);
+            }
+            );
 
             // create "archived" tag so we know this was completed
-            item.addTag("archived");
-            item.saveTx();
+            // item.addTag("archived");
+            // item.saveTx();
             
             break;
         case 400:
@@ -119,16 +144,15 @@ Zotero.RobustLinksCreator = {
             break;
         }
 
-        console.log("expecting output to appear: " + notice);
+        Zotero.debug("expecting output to appear: " + notice);
 
-        errorNotifWindow.changeHeadline(notice);
-        errorNotifWindow.show();
-        errorNotifWindow.startCloseTimer(5000);
+        this.issueNotice(notice, 5000);
+
     },
 
     makeRobustLink : function(archive_name, item) {
 
-        console.log("starting makeRobustLink");
+        Zotero.debug("starting makeRobustLink");
         var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
 
         if (item === null) {
@@ -137,53 +161,46 @@ Zotero.RobustLinksCreator = {
             var item = selectedItems[0];
         }
 
-        console.log("item.itemTypeID is " + item.itemTypeID);
+        Zotero.debug("item.itemTypeID is " + item.itemTypeID);
 
         var url = item.getField('url');
 
-        console.log("url is " + url);
+        Zotero.debug("url is " + url);
 
         if (item.itemTypeID == 2){
             notice = "Refusing to archive attachment";
-            errorNotifWindow.changeHeadline(notice);
-            errorNotifWindow.show();
-            errorNotifWindow.startCloseTimer(3000);
-            errorNotifWindow.changeHeadline(notice);
+            this.issueNotice(notice, 5000);
             return;
         }
 
         if ( item.itemTypeID == 26) {
             notice = "Refusing to archive note";
-            errorNotifWindow.changeHeadline(notice);
-            errorNotifWindow.show();
-            errorNotifWindow.startCloseTimer(3000);
-            errorNotifWindow.changeHeadline(notice);
+            this.issueNotice(notice, 5000);
             return;
         }
 
         if (url == "") {
-            console.log("no URL field, returning...");
+            Zotero.debug("no URL field, returning...");
             notice = "Refusing to archive blank URL";
-            errorNotifWindow.changeHeadline(notice);
-            errorNotifWindow.show();
-            errorNotifWindow.startCloseTimer(3000);
-            errorNotifWindow.changeHeadline(notice);
+            this.issueNotice(notice, 5000);
             return;
         }
 
-        if (archive_name === null) {
-            notice = "submitting url " + url + " to any web archive";
-        } else {
-            notice = "submitting url " + url + " to web archive " + archive_name;
-        }
-        
-        errorNotifWindow.changeHeadline(notice);
-        errorNotifWindow.show();
-        errorNotifWindow.startCloseTimer(3000);
-
         if (this.checkValidUrl(url)) {
             if (!this.isArchived(item)) {
+                
+                if (archive_name === null) {
+                    notice = "Preserving " + url + " \n at any web archive";
+                } else {
+                    notice = "Preserving " + url + " \n at web archive " + archive_name;
+                }
+                
+                this.issueNotice(notice, 5000);
                 this.call_robust_link_api(url, archive_name, item);
+            } else {
+
+                notice = "URL field already archived";
+                this.issueNotice(notice, 5000);
             }
         }
 
