@@ -2,7 +2,7 @@
 <!DOCTYPE overlay SYSTEM "chrome://zotero_memento/locale/overlay.dtd">
 
 <overlay
-    id="zotero_memento"
+    id="zotero-robust-links"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <script type="text/javascript" src="chrome://zotero_memento/content/scripts/ZoteroRobustLinks.js"/>

@@ -30,6 +30,24 @@ Zotero.RobustLinksCreator = {
         return false;
       },
 
+      isRobustified : function(item) {
+        Zotero.debug("isRobustified was called...");
+
+        for (i in item.getTags()) {
+            Zotero.debug("checking tag " + i );
+
+            tagval = item.getTags()[i]["tag"];
+
+            Zotero.debug("get tag " + item.getTags()[i]["tag"]);
+
+            if (tagval == "robustified") {
+                return true;
+            }
+
+        }
+        return false;
+      },
+
     /*
      * Ensures that a URL leads to a valid page and uses HTTP/HTTPS.
      *
@@ -65,7 +83,6 @@ Zotero.RobustLinksCreator = {
         
         var notice = "";
 
-        // api_url = "https://www.shawnmjones.org";
         if (archive === null ) {
             api_url = "https://robustlinks.mementoweb.org/api/?" + "url=" + encodeURIComponent(url);
         } else {
@@ -80,13 +97,28 @@ Zotero.RobustLinksCreator = {
 
         Zotero.debug("extracting RL response and responding ourselves appropriately...");
 
-        xhr.status = 200;
+        // xhr.status = 200;
 
         Zotero.debug("xhr.status is now " + xhr.status);
 
         switch(xhr.status) {
         case 200:
             notice = "Success! Note contains archived link.";
+
+            // for testing...
+            // jdata = {
+            //     "anchor_text": "ABC News for June 15, 2020",
+            //     "api_version": "0.8.1",
+            //     "data-originalurl": url,
+            //     "data-versiondate": "2020-06-15",
+            //     "data-versionurl": "https://archive.li/wip/hWZdd",
+            //     "request_url": url,
+            //     "request_url_resource_type": "original-resource",
+            //     "robust_links_html": {
+            //         "memento_url_as_href": "<a href=\"https://archive.li/wip/hWZdd\"\ndata-originalurl=\"https://abcnews.go.com\"\ndata-versiondate=\"2020-06-15\">ABC News for June 15, 2020</a>",
+            //         "original_url_as_href": "<a href=\"https://abcnews.go.com\"\ndata-versionurl=\"https://archive.li/wip/hWZdd\"\ndata-versiondate=\"2020-06-15\">ABC News for June 15, 2020</a>"
+            //     }
+            // };
 
             jdata = JSON.parse(xhr.responseText);
             Zotero.debug("creating new attachment with " + jdata["data-originalurl"]);
@@ -104,11 +136,19 @@ Zotero.RobustLinksCreator = {
             Zotero.debug(attachmentPromise);
 
             attachmentPromise.then((item) => {
-                // Zotero.debug(value);
-                // Zotero.debug("methods?");
-                // Zotero.debug( getMethods(value) );
-                Zotero.debug("successful creation of attachment with id: " + item.id);
-                item.setNote(JSON.stringify(jdata));
+
+                Zotero.debug("successful creation of attachment with id: " + item.id);              
+
+                notetext = "";
+                notetext += '<!-- RobustLinks CSS -->';
+                notetext += '<link rel="stylesheet" type="text/css" href="https://doi.org/10.25776/z58z-r575" />';
+                notetext += '<!-- RobustLinks Javascript -->';
+                notetext += '<script type="text/javascript" src="https://doi.org/10.25776/h1fa-7a28"></script>';
+                notetext += "Original URL: " + jdata["robust_links_html"]["original_url_as_href"];
+                notetext += "<br>";
+                notetext += "Memento URL: " + jdata["robust_links_html"]["memento_url_as_href"];
+
+                item.setNote(notetext);
                 item.saveTx();
             },
             (reason) => {
@@ -118,8 +158,8 @@ Zotero.RobustLinksCreator = {
             );
 
             // create "archived" tag so we know this was completed
-            // item.addTag("archived");
-            // item.saveTx();
+            item.addTag("robustified");
+            item.saveTx();
             
             break;
         case 400:
@@ -144,16 +184,93 @@ Zotero.RobustLinksCreator = {
             break;
         }
 
-        Zotero.debug("expecting output to appear: " + notice);
+        Zotero.debug(notice);
 
         this.issueNotice(notice, 5000);
 
     },
 
+    getBestURL: function(item) {
+        var url = item.getField('url');
+
+        Zotero.debug("detected url [" + url + "]");
+
+        var doi = item.getField('DOI');
+
+        Zotero.debug("detected doi [" + doi + "]");
+
+        Zotero.debug(doi == '');
+
+        if (doi != "") {
+            url = "https://doi.org/" + doi;
+        }
+
+        Zotero.debug("using url " + url);
+
+        return url;
+    },
+
     makeRobustLink : function(archive_name, item) {
 
         Zotero.debug("starting makeRobustLink");
-        var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
+
+        if (item === null) {
+            var pane = Zotero.getActiveZoteroPane();
+            var selectedItems = pane.getSelectedItems();
+            var item = selectedItems[0];
+        }
+
+        Zotero.debug("item ID = " + item.id);
+        Zotero.debug("item.itemTypeID is " + item.itemTypeID);
+
+        var url = this.getBestURL(item);
+
+        if (item.itemTypeID == 2){
+            notice = "Refusing to archive attachment";
+            Zotero.debug(notice);
+            this.issueNotice(notice, 5000);
+            return;
+        }
+
+        if ( item.itemTypeID == 26) {
+            notice = "Refusing to archive note";
+            Zotero.debug(notice);
+            this.issueNotice(notice, 5000);
+            return;
+        }
+
+        if (url == "") {
+            Zotero.debug("no URL field, returning...");
+            notice = "Refusing to archive blank URL";
+            Zotero.debug(notice);
+            this.issueNotice(notice, 5000);
+            return;
+        }
+
+        if (this.checkValidUrl(url)) {
+            if (!this.isArchived(item)) {
+                
+                if (archive_name === null) {
+                    notice = "Preserving " + url + " \n at any web archive";
+                } else {
+                    notice = "Preserving " + url + " \n at web archive " + archive_name;
+                }
+                Zotero.debug(notice);
+                
+                this.issueNotice(notice, 5000);
+                this.call_robust_link_api(url, archive_name, item);
+            } else {
+
+                notice = "Already preserved at a web archive";
+                this.issueNotice(notice, 5000);
+            }
+        }
+
+    },
+
+    eventMakeRobustLink : function(archive_name, item) {
+
+        Zotero.debug("starting eventMakeRobustLink");
 
         if (item === null) {
             var pane = Zotero.getActiveZoteroPane();
@@ -163,26 +280,22 @@ Zotero.RobustLinksCreator = {
 
         Zotero.debug("item.itemTypeID is " + item.itemTypeID);
 
-        var url = item.getField('url');
+        var url = this.getBestURL(item);
 
-        Zotero.debug("url is " + url);
+        // this fixes duplicating items that are Robustified, but not those that are not
+        if (this.isRobustified(item)) {
+            return;
+        }
 
         if (item.itemTypeID == 2){
-            notice = "Refusing to archive attachment";
-            this.issueNotice(notice, 5000);
             return;
         }
 
         if ( item.itemTypeID == 26) {
-            notice = "Refusing to archive note";
-            this.issueNotice(notice, 5000);
             return;
         }
 
-        if (url == "") {
-            Zotero.debug("no URL field, returning...");
-            notice = "Refusing to archive blank URL";
-            this.issueNotice(notice, 5000);
+        if (url == '') {
             return;
         }
 
@@ -197,10 +310,6 @@ Zotero.RobustLinksCreator = {
                 
                 this.issueNotice(notice, 5000);
                 this.call_robust_link_api(url, archive_name, item);
-            } else {
-
-                notice = "URL field already archived";
-                this.issueNotice(notice, 5000);
             }
         }
 
