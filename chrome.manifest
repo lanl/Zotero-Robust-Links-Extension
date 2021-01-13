@@ -1,3 +1,4 @@
-content zotero_memento chrome/content/
+content robustlinks chrome/content/robustlinks/
 
-overlay chrome://zotero/content/zoteroPane.xul chrome://zotero_memento/content/overlay.xul
+overlay chrome://zotero/content/zoteroPane.xul chrome://robustlinks/content/overlay.xul
+locale robustlinks en-US chrome/locale/en-US/

@@ -1,21 +1,26 @@
 <?xml version="1.0"?>
-<!DOCTYPE overlay SYSTEM "chrome://zotero_memento/locale/overlay.dtd">
+<!DOCTYPE overlay SYSTEM "chrome://robustlinks/locale/overlay.dtd">
 
 <overlay
     id="zotero-robust-links"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <script type="text/javascript" src="chrome://zotero_memento/content/scripts/ZoteroRobustLinks.js"/>
-    <script type="text/javascript" src="chrome://zotero_memento/content/scripts/RobustLinksCreator.js"></script>
-
     <popup id="zotero-itemmenu">
       <menu class="menu-iconic" id="zotero-itemmenu-zoteroshortdoi-menu" label="Archive this Resource">
         <menupopup>
+          <menuitem label="Default Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('default', null)"/>
           <menuitem label="Any Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink(null, null)"/>
           <menuitem label="Internet Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.org', null)"/>
           <menuitem label="Archive.Today" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.today', null)"/>
         </menupopup>
       </menu>
     </popup>
+
+    <menupopup id="menu_ToolsPopup">
+      <menuitem id="robustlinks-options" insertafter="menu_preferences" label="&robustlinks-options.label;" oncommand="Zotero.RobustLinks.openPreferences();"/>
+    </menupopup>
+
+    <script src="chrome://robustlinks/content/ZoteroRobustLinks.js"/>
+    <script src="chrome://robustlinks/content/RobustLinksCreator.js"/>
 
 </overlay>

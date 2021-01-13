@@ -9,7 +9,6 @@ Zotero.RobustLinks = {
     }, false);
   },
  
- 
   // Callback implementing the notify() method to pass to the Notifier
   notifierCallback: {
     notify: function(event, type, ids, extraData) {
@@ -24,20 +23,45 @@ Zotero.RobustLinks = {
       // if ( (event == 'add') || (event == 'modify') ) {
       if ((event == 'add') && (type == 'item')) {
 
+        if ( (Zotero.Prefs.get('extensions.robustlinks.archiveonadd', true) == "no" ) ) {
+          return;
+        }
+
         for(item of items) {
 
           Zotero.debug("item is of type " + item.itemTypeID);
 
           // we don't work with attachments (2) or notes (26)
           if (item.itemTypeID != 2 && item.itemTypeID != 26) {
-            Zotero.RobustLinksCreator.eventMakeRobustLink(null, item);
+            archive_name = this.getPref('whatarchive');
+
+            if ( archive_name == "random" ) {
+              archive_name = null;
+            }
+
+            Zotero.RobustLinksCreator.eventMakeRobustLink(archive_name, item);
           }
 
         }
       }
 
     }
+  },
+
+  openPreferences: function () {
+
+    if (!('_preferencesWindow' in this) || this._preferencesWindow === null || this._preferencesWindow.closed) {
+        var featureStr = 'chrome,titlebar,toolbar=yes,resizable,centerscreen,';
+        var modalStr = Services.prefs.getBoolPref('browser.preferences.instantApply') ? 'dialog=no' : 'modal';
+        featureStr = featureStr + modalStr;
+
+        this._preferencesWindow =
+            window.openDialog('chrome://robustlinks/content/options.xul', 'robustlinks-prefs', featureStr);
+    }
+
+    this._preferencesWindow.focus();
   }
+
 };
 
 window.addEventListener('load', Zotero.RobustLinks.init(), false);

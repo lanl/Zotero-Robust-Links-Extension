@@ -12,7 +12,9 @@
         em:creator="Shawn M. Jones"
         em:description="Plugin for archiving saved resources and creating Robust Links"
         em:homepageURL="https://robustlinks.mementoweb.org"
-        em:updateURL="">
+        em:updateURL=""
+        em:optionsURL="chrome://robustlinks/content/options.xul"
+        >
         <em:type>2</em:type>
         <em:targetApplication>
             <Description>

@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/preferences.css"?>
+
+<!DOCTYPE window SYSTEM "chrome://robustlinks/locale/options.dtd">
+
+<prefwindow id="robustlinks-prefs"
+    title="&robustlinks.menuitem;"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    onload="updatePreferenceWindow('all');"
+    >
+
+    <prefpane label="&robustlinks.preferences.title;" id="robustlinks-prefpane">
+        <preferences>
+            <preference id="pref-robustlinks-archiveonadd" name="extensions.robustlinks.archiveonadd" type="string"/>
+            <preference id="pref-robustlinks-whatarchive" name="extensions.robustlinks.whatarchive" type="string"/>
+            <preference id="pref-robustlinks-alwaysurir" name="extensions.robustlinks.alwaysurir" type="string"/>
+        </preferences>
+
+        <tabbox id="robustlinks-tabbox">
+            <tabpanel orient="vertical">
+                <caption label="&robustlinks.preferences.archiveonadd;" />
+                <radiogroup id="id-robustlinks-archiveonadd" preference="pref-robustlinks-archiveonadd">
+                    <radio label="&robustlinks.preferences.yes.label;" value="yes" selected="true" />
+                    <radio label="&robustlinks.preferences.no.label;" value="no" />
+                </radiogroup>
+                <separator/>
+                <caption label="&robustlinks.preferences.whicharchive;" />
+                <radiogroup id="id-robustlinks-whicharchive" preference="pref-robustlinks-whatarchive">
+                    <radio label="&robustlinks.preferences.random.label;" value="random" selected="true" />
+                    <radio label="&robustlinks.preferences.archiveorg.label;" value="archive.org"/>
+                    <radio label="&robustlinks.preferences.archivetoday.label;" value="archive.today" />
+                </radiogroup>
+                <separator/>
+                <groupbox>
+                    <caption label="&robustlinks.preferences.advanced.title;" />
+                    <radiogroup id="id-robustlinks-alwaysurir" preference="pref-robustlinks-alwaysurir">
+                        <caption label="&robustlinks.preferences.always.urir;" />
+                        <radio label="&robustlinks.preferences.yes.label;" value="yes"/>
+                        <radio label="&robustlinks.preferences.no.label;" value="no" selected="true" />
+                    </radiogroup>
+                </groupbox>
+            </tabpanel>
+        </tabbox>
+
+    </prefpane>
+
+</prefwindow>

@@ -30,7 +30,7 @@ Zotero.RobustLinksCreator = {
         return false;
       },
 
-      isRobustified : function(item) {
+    isRobustified : function(item) {
         Zotero.debug("isRobustified was called...");
 
         for (i in item.getTags()) {
@@ -47,6 +47,24 @@ Zotero.RobustLinksCreator = {
         }
         return false;
       },
+
+    /**
+     * Get preference value in 'extensions.zotfile' branch
+     * @param  {string} pref     Name of preference in 'extensions.zotfile' branch
+     * @return {string|int|bool} Value of preference.
+     */
+    getPref: function(pref) {
+        return Zotero.Prefs.get('extensions.robustlinks.' + pref, true);
+    },
+  
+    /**
+     * Set preference value in 'extensions.zotfile' branch
+     * @param {string}          pref  Name of preference in 'extensions.zotfile' branch
+     * @param {string|int|bool} value Value of preference
+     */
+    setPref: function(pref, value) {        
+        Zotero.Prefs.set('extensions.robustlinks.' + pref, value, true);
+    },
 
     /*
      * Ensures that a URL leads to a valid page and uses HTTP/HTTPS.
@@ -67,10 +85,11 @@ Zotero.RobustLinksCreator = {
         return true;
       },
 
-    issueNotice: function(notice, timeout) {
+    issueNotice: function(notice_title, notice, timeout) {
         var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
 
-        errorNotifWindow.changeHeadline(notice);
+        errorNotifWindow.changeHeadline(notice_title);
+        errorNotifWindow.addLines(notice);
         errorNotifWindow.show();
         errorNotifWindow.startCloseTimer(timeout);
     },
@@ -91,6 +110,14 @@ Zotero.RobustLinksCreator = {
         
         var xhr = new XMLHttpRequest();
         // var xhr = new Object();
+
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                this.issueNotice("TESTING", "cool things happened here", 50000);
+                window.alert("We did it, we made onreadystatechange work!");
+            }
+        };
+
         xhr.open("GET", api_url, false);
         Zotero.debug("with xhr, sending " + url + " to " + api_url);
         xhr.send();
@@ -100,6 +127,8 @@ Zotero.RobustLinksCreator = {
         // xhr.status = 200;
 
         Zotero.debug("xhr.status is now " + xhr.status);
+
+        notice_duration = 15000;
 
         switch(xhr.status) {
         case 200:
@@ -160,33 +189,43 @@ Zotero.RobustLinksCreator = {
             // create "archived" tag so we know this was completed
             item.addTag("robustified");
             item.saveTx();
+
+            notice_duration = 5000;
             
             break;
         case 400:
+            notice_title = "Robust Links ERROR"
             notice = "There was an issue with the value in the URL field.";
             break;
         case 403:
+            notice_title = "Robust Links ERROR"
             notice = "Cannot create a memento for the value in the URL field due to legal or policy reasons.";
             break;
         case 404:
         case 405:
+            notice_title = "Robust Links ERROR"
             notice = "There is an issue with the Zotero Robust Links Extension. Please contact the extension maintainer.";
             break;
         case 500:
+            notice_title = "Robust Links ERROR"
             notice = "There is an issue with the Robust Links service. Please try again later.";
             break;
         case 502:
         case 503:
+            notice_title = "Robust Links ERROR"
             notice = "There was an issue creating a memento at " + archive + ". Please try again later.";
             break;
         case 504:
+            notice_title = "Robust Links ERROR"
             notice = "The Robust Links service is experiencing issues. Please try again later.";
             break;
         }
 
+        // window.alert(notice);
+
         Zotero.debug(notice);
 
-        this.issueNotice(notice, 5000);
+        this.issueNotice(notice_title, notice, notice_duration);
 
     },
 
@@ -210,6 +249,9 @@ Zotero.RobustLinksCreator = {
         return url;
     },
 
+    /*
+     * Make a Robust Link from an item.
+     */
     makeRobustLink : function(archive_name, item) {
 
         Zotero.debug("starting makeRobustLink");
@@ -228,14 +270,14 @@ Zotero.RobustLinksCreator = {
         if (item.itemTypeID == 2){
             notice = "Refusing to archive attachment";
             Zotero.debug(notice);
-            this.issueNotice(notice, 5000);
+            this.issueNotice("Robust Links WARNING", notice, 5000);
             return;
         }
 
         if ( item.itemTypeID == 26) {
             notice = "Refusing to archive note";
             Zotero.debug(notice);
-            this.issueNotice(notice, 5000);
+            this.issueNotice("Robust Links WARNING", notice, 5000);
             return;
         }
 
@@ -243,31 +285,42 @@ Zotero.RobustLinksCreator = {
             Zotero.debug("no URL field, returning...");
             notice = "Refusing to archive blank URL";
             Zotero.debug(notice);
-            this.issueNotice(notice, 5000);
+            this.issueNotice("Robust Links WARNING", notice, 5000);
             return;
         }
 
         if (this.checkValidUrl(url)) {
             if (!this.isArchived(item)) {
-                
-                if (archive_name === null) {
+
+                /* this is null rather than 'random' so we can fall through */
+                if (archive_name === null ) {
                     notice = "Preserving " + url + " \n at any web archive";
+                } else if ( archive_name == 'default' ) {
+                    archive_name = this.getPref('whatarchive');
+
+                    if ( archive_name == "random" ) {
+                        archive_name = null;
+                    }
+                    notice = "Preserving " + url + " \n at web archive " + archive_name;
                 } else {
                     notice = "Preserving " + url + " \n at web archive " + archive_name;
                 }
                 Zotero.debug(notice);
                 
-                this.issueNotice(notice, 5000);
+                this.issueNotice("Robust Links INFO", notice, 5000);
                 this.call_robust_link_api(url, archive_name, item);
             } else {
 
                 notice = "Already preserved at a web archive";
-                this.issueNotice(notice, 5000);
+                this.issueNotice("Robust Links INFO", notice, 5000);
             }
         }
 
     },
 
+    /*
+     * Make a Robust link in response to an event from ZoteroRobustLinks.js, like 'add'.
+     */
     eventMakeRobustLink : function(archive_name, item) {
 
         Zotero.debug("starting eventMakeRobustLink");
@@ -308,7 +361,7 @@ Zotero.RobustLinksCreator = {
                     notice = "Preserving " + url + " \n at web archive " + archive_name;
                 }
                 
-                this.issueNotice(notice, 5000);
+                this.issueNotice("Robust Links INFO", notice, 5000);
                 this.call_robust_link_api(url, archive_name, item);
             }
         }
