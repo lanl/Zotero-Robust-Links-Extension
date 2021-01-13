@@ -33,7 +33,7 @@ Zotero.RobustLinks = {
 
           // we don't work with attachments (2) or notes (26)
           if (item.itemTypeID != 2 && item.itemTypeID != 26) {
-            archive_name = this.getPref('whatarchive');
+            archive_name = Zotero.Prefs.get('extensions.robustlinks.whatarchive', true);
 
             if ( archive_name == "random" ) {
               archive_name = null;
