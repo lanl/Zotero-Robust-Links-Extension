@@ -10,7 +10,7 @@ const getMethods = (obj) => {
 Zotero.RobustLinksCreator = {
 
     /*
-     * Indicates whether an item has an "archived" tag or not.
+     * Indicates whether an item has a 'Robust Link' attachment.
      *
      * @param {Zotero.Item} item: item to be checked.
      *
@@ -30,42 +30,6 @@ Zotero.RobustLinksCreator = {
         return false;
       },
 
-    isRobustified : function(item) {
-        Zotero.debug("isRobustified was called...");
-
-        for (i in item.getTags()) {
-            Zotero.debug("checking tag " + i );
-
-            tagval = item.getTags()[i]["tag"];
-
-            Zotero.debug("get tag " + item.getTags()[i]["tag"]);
-
-            if (tagval == "robustified") {
-                return true;
-            }
-
-        }
-        return false;
-      },
-
-    /**
-     * Get preference value in 'extensions.zotfile' branch
-     * @param  {string} pref     Name of preference in 'extensions.zotfile' branch
-     * @return {string|int|bool} Value of preference.
-     */
-    getPref: function(pref) {
-        return Zotero.Prefs.get('extensions.robustlinks.' + pref, true);
-    },
-  
-    /**
-     * Set preference value in 'extensions.zotfile' branch
-     * @param {string}          pref  Name of preference in 'extensions.zotfile' branch
-     * @param {string|int|bool} value Value of preference
-     */
-    setPref: function(pref, value) {        
-        Zotero.Prefs.set('extensions.robustlinks.' + pref, value, true);
-    },
-
     /*
      * Ensures that a URL leads to a valid page and uses HTTP/HTTPS.
      *
@@ -77,7 +41,6 @@ Zotero.RobustLinksCreator = {
 
     checkValidUrl : function(url) {
         var pattern = /https?:\/\/.+/;
-        var status = -1;
         var https = pattern.test(url);
         if (!https) {
           return false;
@@ -169,10 +132,11 @@ Zotero.RobustLinksCreator = {
                 Zotero.debug("successful creation of attachment with id: " + item.id);              
 
                 notetext = "";
-                notetext += '<!-- RobustLinks CSS -->';
-                notetext += '<link rel="stylesheet" type="text/css" href="https://doi.org/10.25776/z58z-r575" />';
-                notetext += '<!-- RobustLinks Javascript -->';
-                notetext += '<script type="text/javascript" src="https://doi.org/10.25776/h1fa-7a28"></script>';
+                // It looks like Zotero swallows <link> and <script> elements
+                // notetext += '<!-- RobustLinks CSS -->';
+                // notetext += '<link rel="stylesheet" type="text/css" href="https://doi.org/10.25776/z58z-r575" />';
+                // notetext += '<!-- RobustLinks Javascript -->';
+                // notetext += '<script type="text/javascript" src="https://doi.org/10.25776/h1fa-7a28"></script>';
                 notetext += "Original URL: " + jdata["robust_links_html"]["original_url_as_href"];
                 notetext += "<br>";
                 notetext += "Memento URL: " + jdata["robust_links_html"]["memento_url_as_href"];
@@ -186,8 +150,6 @@ Zotero.RobustLinksCreator = {
             }
             );
 
-            // create "archived" tag so we know this was completed
-            item.addTag("robustified");
             item.saveTx();
 
             notice_duration = 5000;
@@ -296,7 +258,7 @@ Zotero.RobustLinksCreator = {
                 if (archive_name === null ) {
                     notice = "Preserving " + url + " \n at any web archive";
                 } else if ( archive_name == 'default' ) {
-                    archive_name = this.getPref('whatarchive');
+                    archive_name = Zotero.Prefs.get('extensions.robustlinks.whatarchive', true);
 
                     if ( archive_name == "random" ) {
                         archive_name = null;
@@ -336,7 +298,8 @@ Zotero.RobustLinksCreator = {
         var url = this.getBestURL(item);
 
         // this fixes duplicating items that are Robustified, but not those that are not
-        if (this.isRobustified(item)) {
+        // TODO: do we need this anymore now that we have isArchived?
+        if (this.isArchived(item)) {
             return;
         }
 
@@ -353,17 +316,16 @@ Zotero.RobustLinksCreator = {
         }
 
         if (this.checkValidUrl(url)) {
-            if (!this.isArchived(item)) {
                 
-                if (archive_name === null) {
-                    notice = "Preserving " + url + " \n at any web archive";
-                } else {
-                    notice = "Preserving " + url + " \n at web archive " + archive_name;
-                }
-                
-                this.issueNotice("Robust Links INFO", notice, 5000);
-                this.call_robust_link_api(url, archive_name, item);
+            if (archive_name === null) {
+                notice = "Preserving " + url + " \n at any web archive";
+            } else {
+                notice = "Preserving " + url + " \n at web archive " + archive_name;
             }
+            
+            this.issueNotice("Robust Links INFO", notice, 5000);
+            this.call_robust_link_api(url, archive_name, item);
+
         }
 
     }
