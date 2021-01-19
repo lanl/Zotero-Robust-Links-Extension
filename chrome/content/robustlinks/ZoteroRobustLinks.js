@@ -39,7 +39,7 @@ Zotero.RobustLinks = {
               archive_name = null;
             }
 
-            Zotero.RobustLinksCreator.eventMakeRobustLink(archive_name, item);
+            Zotero.RobustLinksCreator.makeRobustLink(archive_name, item, false);
           }
 
         }
