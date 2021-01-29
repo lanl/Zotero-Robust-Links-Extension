@@ -53,12 +53,6 @@ function doExport(){
 
 		if (foundRobustLink === true) {
 			Zotero.write('<A HREF="'+originalurl+'" data-versionurl="'+versionurl+'" data-versiondate="'+versiondate+'">'+item.title+'</A>\n');
-        } else {
-            var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
-            errorNotifWindow.changeHeadline("WARNING");
-            errorNotifWindow.addLines("No Robust Link found, nothing to export");
-            errorNotifWindow.show();
-            errorNotifWindow.startCloseTimer(15000);
         }
 	}
 }
