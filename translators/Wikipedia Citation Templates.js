@@ -2,7 +2,7 @@
 	"translatorID": "3f50aaac-7acc-4350-acd0-59cb77faf620",
 	"translatorType": 2,
 	"label": "Wikipedia Citation Templates",
-	"creator": "Simon Kornblith",
+	"creator": "Simon Kornblith - update for Robust Links by Shawn M. Jones",
 	"target": "txt",
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
