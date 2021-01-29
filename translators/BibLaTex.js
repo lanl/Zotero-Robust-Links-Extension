@@ -4,7 +4,7 @@
 	"label": "BibLaTeX",
 	"creator": "Simon Kornblith, Richard Karnesky and Anders Johansson - update for Robust Links by Shawn M. Jones",
 	"target": "bib",
-	"minVersion": "2.1.9rl",
+	"minVersion": "2.1.9",
 	"maxVersion": "null",
 	"priority": 100,
 	"inRepository": true,

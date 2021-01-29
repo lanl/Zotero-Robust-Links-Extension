@@ -1,7 +1,7 @@
 {
 	"translatorID": "4e7119e0-02be-4848-86ef-79a64185aad8",
 	"label": "Bookmarks",
-	"creator": "Avram Lyon",
+	"creator": "Avram Lyon - update for Robust Links by Shawn M. Jones",
 	"target": "html",
 	"minVersion": "2.1b6",
 	"maxVersion": "",
