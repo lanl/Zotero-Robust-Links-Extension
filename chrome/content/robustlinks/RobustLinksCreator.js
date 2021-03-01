@@ -1,3 +1,5 @@
+
+/* for debugging */
 const getMethods = (obj) => {
     let properties = new Set()
     let currentObj = obj
@@ -138,14 +140,36 @@ Zotero.RobustLinksCreator = {
                 Zotero.debug("successful creation of attachment with id: " + item.id);              
 
                 notetext = "";
-                // It looks like Zotero swallows <link> and <script> elements
+                // It looks like Zotero swallows <head>, <link>, and <script> elements
+                // notetext += '<head>';
                 // notetext += '<!-- RobustLinks CSS -->';
                 // notetext += '<link rel="stylesheet" type="text/css" href="https://doi.org/10.25776/z58z-r575" />';
                 // notetext += '<!-- RobustLinks Javascript -->';
                 // notetext += '<script type="text/javascript" src="https://doi.org/10.25776/h1fa-7a28"></script>';
+                // notetext += '</head>';
+
                 notetext += "Original URL: " + jdata["robust_links_html"]["original_url_as_href"];
                 notetext += "<br>";
                 notetext += "Memento URL: " + jdata["robust_links_html"]["memento_url_as_href"];
+
+                notetext += "<hr>";
+                notetext += "<strong>Step 1: If you would like to include this Robust Link in your web page, copy the appropriate HTML snippet below.</strong>"
+                notetext += "<hr>";
+                notetext += "Copy this snippet if you want the link text to lead to the live web resource <" + jdata['data-originalurl'] + ">.";
+                notetext += "<br><br>";
+                notetext += jdata["robust_links_html"]["original_url_as_href"].replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+                notetext += "<hr>";
+                notetext += "Copy this snippet if you want the link text to lead to the memento <" + jdata['data-versionurl'] + ">.";
+                notetext += "<br><br>";
+                notetext += jdata["robust_links_html"]["memento_url_as_href"].replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");;
+                notetext += "<hr>";
+                notetext += "<strong>Step 2: If you would like to make your Robust Links actionable, include this HTML in your web page, preferably inside the HEAD tag.</strong>";
+                notetext += "<br><br>";
+                notetext += "&lt;!-- RobustLinks CSS --&gt;<br>\
+                &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;https://doi.org/10.25776/z58z-r575&quot; /&gt;<br>\
+                &lt;!-- RobustLinks Javascript --&gt;<br>\
+                &lt;script type=&quot;text/javascript&quot; src=&quot;https://doi.org/10.25776/h1fa-7a28&quot;&gt;&lt;/script&gt;<br>\
+                ";
 
                 item.setNote(notetext);
                 item.saveTx();
@@ -181,7 +205,16 @@ Zotero.RobustLinksCreator = {
         case 502:
         case 503:
             notice_title = "Robust Links ERROR";
-            notice = "There was an issue creating a memento at " + archive + ". Please try again later.";
+
+            var archive_menu_option = {
+                "archive.org": "Internet Archive",
+                "archive.is": "Archive Today",
+                null: "Any Web Archive"
+            };
+
+            // notice = "There was an issue creating a memento at " + archive_name + ". Please try again later.";
+            notice = "There was an issue creating a memento for " + url + " at " + archive_menu_option[archive] + ".\n\n\n\nPlease try archiving the resource again later by right clicking this item and choosing Robustify This Resource -> " + archive_menu_option[archive];
+            notice_duration = 30000;
             break;
         case 504:
             notice_title = "Robust Links ERROR";

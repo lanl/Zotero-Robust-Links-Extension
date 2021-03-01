@@ -6,7 +6,7 @@
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <popup id="zotero-itemmenu">
-      <menu class="menu-iconic" id="zotero-itemmenu-zoteroshortdoi-menu" label="Archive this Resource">
+      <menu class="menu-iconic" id="zotero-itemmenu-zoteroshortdoi-menu" label="Robustify This Resource">
         <menupopup>
           <menuitem label="Default Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('default', null)"/>
           <menuitem label="Any Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink(null, null)"/>
