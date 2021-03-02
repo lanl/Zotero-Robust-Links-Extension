@@ -63,7 +63,7 @@ Zotero.RobustLinksCreator = {
     * Displays appropriate status window if there is an error, fills in URI-M otherwise.
     * 
     */
-    call_robust_link_api: function(url, archive, item, urir_shortcircuit) {
+    call_robust_link_api: async function(url, archive, item, urir_shortcircuit) {
         
         var notice = "";
 
@@ -208,7 +208,7 @@ Zotero.RobustLinksCreator = {
 
             var archive_menu_option = {
                 "archive.org": "Internet Archive",
-                "archive.is": "Archive Today",
+                "archive.today": "Archive.Today",
                 null: "Any Web Archive"
             };
 
