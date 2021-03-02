@@ -1,13 +1,13 @@
 
 /* for debugging */
-const getMethods = (obj) => {
-    let properties = new Set()
-    let currentObj = obj
-    do {
-      Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
-    } while ((currentObj = Object.getPrototypeOf(currentObj)))
-    return [...properties.keys()].filter(item => typeof obj[item] === 'function')
-  }
+// const getMethods = (obj) => {
+//     let properties = new Set()
+//     let currentObj = obj
+//     do {
+//       Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
+//     } while ((currentObj = Object.getPrototypeOf(currentObj)))
+//     return [...properties.keys()].filter(item => typeof obj[item] === 'function')
+//   }
 
 Zotero.RobustLinksCreator = {
 
@@ -63,7 +63,7 @@ Zotero.RobustLinksCreator = {
     * Displays appropriate status window if there is an error, fills in URI-M otherwise.
     * 
     */
-    call_robust_link_api: async function(url, archive, item, urir_shortcircuit) {
+    call_robust_link_api: function(url, archive, item, urir_shortcircuit) {
         
         var notice = "";
 
@@ -73,58 +73,32 @@ Zotero.RobustLinksCreator = {
             api_url = "https://robustlinks.mementoweb.org/api/?" + "archive=" + encodeURIComponent(archive) + "&url=" + encodeURIComponent(url);
         }
 
+        // for testing
+        // api_url = "https://robustlinks.mementoweb.org/apii/?" + "archive=testfailarchive&url=" +encodeURIComponent(url);
+
         if ( urir_shortcircuit === true ){
             api_url = api_url + '&urir_shortcircuit=True';
         }
         
-        var xhr = new XMLHttpRequest();
-        // var xhr = new Object();
+        fetch(api_url).then( (response) => {
 
-        // Note: leaving this here for future developers - Zotero does not appear to support onreadystatechange
-        // xhr.onreadystatechange = function() {
-        //     if (this.readyState == 4 && this.status == 200) {
-        //         this.issueNotice("TESTING", "cool things happened here", 50000);
-        //         window.alert("We did it, we made onreadystatechange work!");
-        //     }
-        // };
+            status = response.status;
 
-        xhr.open("GET", api_url, false);
-        Zotero.debug("with xhr, sending " + url + " to " + api_url);
-        xhr.send();
+            Zotero.debug("we have fetched " + api_url + " and got back " + status);
 
-        Zotero.debug("extracting RL response and responding ourselves appropriately...");
+            if (status == 200) {
+                Zotero.debug("got a 200, returning response object for .then");
+                return response.json();
+            } else {
+                throw response.status;
+            }
 
-        // xhr.status = 200;
+        }).then( function(jdata) {
 
-        Zotero.debug("xhr.status is now " + xhr.status);
+            Zotero.debug("working with jdata...");
+            Zotero.debug(jdata);
 
-        notice_duration = 15000;
-
-        switch(xhr.status) {
-        case 200:
-            notice_title = "Robust Links INFO";
-            notice = "Success! Note contains archived link.";
-
-            // for testing...
-            // jdata = {
-            //     "anchor_text": "ABC News for June 15, 2020",
-            //     "api_version": "0.8.1",
-            //     "data-originalurl": url,
-            //     "data-versiondate": "2020-06-15",
-            //     "data-versionurl": "https://archive.li/wip/hWZdd",
-            //     "request_url": url,
-            //     "request_url_resource_type": "original-resource",
-            //     "robust_links_html": {
-            //         "memento_url_as_href": "<a href=\"https://archive.li/wip/hWZdd\"\ndata-originalurl=\"https://abcnews.go.com\"\ndata-versiondate=\"2020-06-15\">ABC News for June 15, 2020</a>",
-            //         "original_url_as_href": "<a href=\"https://abcnews.go.com\"\ndata-versionurl=\"https://archive.li/wip/hWZdd\"\ndata-versiondate=\"2020-06-15\">ABC News for June 15, 2020</a>"
-            //     }
-            // };
-
-            jdata = JSON.parse(xhr.responseText);
-            Zotero.debug("creating new attachment with " + jdata["data-originalurl"]);
-            Zotero.debug("item.id is " + item.id);
             attachments = item.getAttachments();
-            Zotero.debug("there are " + attachments.length + " attachments");
 
             var attachmentPromise = Zotero.Attachments.linkFromURL({
                 url: jdata["data-originalurl"],
@@ -140,7 +114,7 @@ Zotero.RobustLinksCreator = {
                 Zotero.debug("successful creation of attachment with id: " + item.id);              
 
                 notetext = "";
-                // It looks like Zotero swallows <head>, <link>, and <script> elements
+                // It looks like Zotero swallows <head>, <link>, and <script> elements, this won't work:
                 // notetext += '<head>';
                 // notetext += '<!-- RobustLinks CSS -->';
                 // notetext += '<link rel="stylesheet" type="text/css" href="https://doi.org/10.25776/z58z-r575" />';
@@ -173,6 +147,15 @@ Zotero.RobustLinksCreator = {
 
                 item.setNote(notetext);
                 item.saveTx();
+
+                notice_title = "Robust Links INFO";
+                notice = "Success! Note contains Robust Link.";
+                notice_duration = 15000;
+                var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
+                errorNotifWindow.changeHeadline(notice_title);
+                errorNotifWindow.addLines(notice);
+                errorNotifWindow.show();
+                errorNotifWindow.startCloseTimer(timeout);
             },
             (reason) => {
                 Zotero.debug("Robust Links failure?");
@@ -180,53 +163,50 @@ Zotero.RobustLinksCreator = {
             }
             );
 
-            item.saveTx();
+        }).catch(function(reason) {
 
-            notice_duration = 5000;
-            
-            break;
-        case 400:
-            notice_title = "Robust Links ERROR";
-            notice = "There was an issue with the value in the URL field.";
-            break;
-        case 403:
-            notice_title = "Robust Links ERROR";
-            notice = "Cannot create a memento for the value in the URL field due to legal or policy reasons.";
-            break;
-        case 404:
-        case 405:
-            notice_title = "Robust Links ERROR";
-            notice = "There is an issue with the Zotero Robust Links Extension. Please contact the extension maintainer.";
-            break;
-        case 500:
-            notice_title = "Robust Links ERROR";
-            notice = "There is an issue with the Robust Links service. Please try again later.";
-            break;
-        case 502:
-        case 503:
-            notice_title = "Robust Links ERROR";
+            Zotero.debug('catching failure ' + reason);
 
-            var archive_menu_option = {
-                "archive.org": "Internet Archive",
-                "archive.today": "Archive.Today",
-                null: "Any Web Archive"
-            };
-
-            // notice = "There was an issue creating a memento at " + archive_name + ". Please try again later.";
-            notice = "There was an issue creating a memento for " + url + " at " + archive_menu_option[archive] + ".\n\n\n\nPlease try archiving the resource again later by right clicking this item and choosing Robustify This Resource -> " + archive_menu_option[archive];
-            notice_duration = 30000;
-            break;
-        case 504:
             notice_title = "Robust Links ERROR";
-            notice = "The Robust Links service is experiencing issues. Please try again later.";
-            break;
-        }
+            notice = "Generic error";
+            notice_duration = 20000;
 
-        // window.alert(notice);
+            switch(reason) {
+                case 400:
+                    notice = "There was an issue with the value in the URL field.";
+                case 403:
+                    notice = "Cannot create a memento for the value in the URL field due to legal or policy reasons.";
+                    break;
+                case 404:
+                case 405:
+                    notice = "There is an issue with the Zotero Robust Links Extension. Please contact the extension maintainer.";
+                    break;
+                case 500:
+                    notice = "There is an issue with the Robust Links service. Please try again later.";
+                    break;
+                case 502:
+                case 503:
 
-        Zotero.debug(notice);
+                    var archive_menu_option = {
+                        "archive.org": "Internet Archive",
+                        "archive.today": "Archive.Today",
+                        null: "Any Web Archive"
+                    };
+        
+                    notice = "There was an issue creating a memento for " + url + " at " + archive_menu_option[archive] + ".\n\n\n\nPlease try archiving the resource again later by right clicking this item and choosing Robustify This Resource -> " + archive_menu_option[archive];
+                    notice_duration = 30000;
+                    break;
+                case 504:
+                    notice = "The Robust Links service is experiencing issues. Please try again later.";
+                    break;
+            }
 
-        this.issueNotice(notice_title, notice, notice_duration);
+            var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
+            errorNotifWindow.changeHeadline(notice_title);
+            errorNotifWindow.addLines(notice);
+            errorNotifWindow.show();
+            errorNotifWindow.startCloseTimer(notice_duration);
+        });
 
     },
 
