@@ -35,7 +35,13 @@ Zotero.RobustLinks = {
           if (item.itemTypeID != 2 && item.itemTypeID != 26) {
             archive_name = Zotero.Prefs.get('extensions.robustlinks.whatarchive', true);
 
+            Zotero.debug("using default archive_name of " + archive_name);
+
             if ( archive_name == "random" ) {
+              archive_name = null;
+            }
+
+            if ( typeof archive_name === 'undefined' ) {
               archive_name = null;
             }
 

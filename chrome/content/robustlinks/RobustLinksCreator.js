@@ -288,7 +288,7 @@ Zotero.RobustLinksCreator = {
                     if ( archive_name == "random" ) {
                         archive_name = null;
                     }
-                    notice = "Preserving " + url + " \n at web archive " + archive_name;
+                    notice = "Preserving " + url + " \n at default web archive " + archive_name;
                 } else {
                     notice = "Preserving " + url + " \n at web archive " + archive_name;
                 }
