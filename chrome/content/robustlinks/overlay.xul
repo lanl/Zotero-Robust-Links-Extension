@@ -8,10 +8,10 @@
     <popup id="zotero-itemmenu">
       <menu class="menu-iconic" id="zotero-itemmenu-zoteroshortdoi-menu" label="Robustify This Resource">
         <menupopup>
-          <menuitem label="Default Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('default', null)"/>
-          <menuitem label="Any Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink(null, null)"/>
-          <menuitem label="Internet Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.org', null)"/>
-          <menuitem label="Archive.Today" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.today', null)"/>
+          <menuitem label="Default Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('default', null, true)"/>
+          <menuitem label="Any Web Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink(null, null, true)"/>
+          <menuitem label="Internet Archive" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.org', null, true)"/>
+          <menuitem label="Archive.Today" oncommand="Zotero.RobustLinksCreator.makeRobustLink('archive.today', null, true)"/>
         </menupopup>
       </menu>
     </popup>

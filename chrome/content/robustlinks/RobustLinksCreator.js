@@ -236,6 +236,8 @@ Zotero.RobustLinksCreator = {
     makeRobustLink : function(archive_name, item, display_status) {
 
         Zotero.debug("starting makeRobustLink");
+        Zotero.debug("archive_name = " + archive_name);
+        Zotero.debug("display_status = " + display_status);
 
         if (item === null) {
             var pane = Zotero.getActiveZoteroPane();
@@ -288,6 +290,11 @@ Zotero.RobustLinksCreator = {
                     if ( archive_name == "random" ) {
                         archive_name = null;
                     }
+
+                    if ( typeof archive_name === 'undefined' ) {
+                        archive_name = null;
+                    }
+
                     notice = "Preserving " + url + " \n at default web archive " + archive_name;
                 } else {
                     notice = "Preserving " + url + " \n at web archive " + archive_name;
@@ -297,6 +304,10 @@ Zotero.RobustLinksCreator = {
                 this.issueNotice("Robust Links INFO", notice, 5000);
 
                 always_assume_urir = Zotero.Prefs.get('extensions.robustlinks.alwaysurir', true);
+
+                if ( typeof always_assume_urir === 'undefined' ) {
+                    always_assume_urir = 'no';
+                }
 
                 Zotero.debug("extensions.robustlinks.alwaysurir is " + always_assume_urir);
 

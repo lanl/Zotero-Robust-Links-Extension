@@ -23,7 +23,13 @@ Zotero.RobustLinks = {
       // if ( (event == 'add') || (event == 'modify') ) {
       if ((event == 'add') && (type == 'item')) {
 
-        if ( (Zotero.Prefs.get('extensions.robustlinks.archiveonadd', true) == "no" ) ) {
+        archive_on_add = Zotero.Prefs.get('extensions.robustlinks.archiveonadd', true);
+
+        if ( typeof archive_on_add === 'undefined' ) {
+          archive_on_add = 'yes';
+        }
+
+        if ( archive_on_add == "no"  ) {
           return;
         }
 
