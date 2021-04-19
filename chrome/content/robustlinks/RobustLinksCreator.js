@@ -150,12 +150,12 @@ Zotero.RobustLinksCreator = {
 
                 notice_title = "Robust Links INFO";
                 notice = "Success! Note contains Robust Link.";
-                notice_duration = 15000;
+                notice_duration = 10000;
                 var errorNotifWindow =  new Zotero.ProgressWindow({closeOnClick:true});
                 errorNotifWindow.changeHeadline(notice_title);
                 errorNotifWindow.addLines(notice);
                 errorNotifWindow.show();
-                errorNotifWindow.startCloseTimer(timeout);
+                errorNotifWindow.startCloseTimer(notice_duration);
             },
             (reason) => {
                 Zotero.debug("Robust Links failure?");

@@ -7,7 +7,7 @@
         RDF:about="urn:mozilla:install-manifest"
         em:id="zotero-robustlinks@mementoweb.org"
         em:name="Zotero Robust Links"
-        em:version="2.0.0-20210324215501"
+        em:version="2.0.0-20210419153723"
         em:type="2"
         em:creator="Shawn M. Jones"
         em:description="Plugin for Robustifying links to web resources."
