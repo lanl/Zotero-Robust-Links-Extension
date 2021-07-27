@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Jones"
+  given-names: "Shawn"
+  orcid: "https://orcid.org/0000-0002-4372-870X"
+- family-names: "Tran"
+  given-names: "Leon"
+- family-names: "Kelly"
+  given-names: "Mat"
+  orcid: "https://orcid.org/0000-0002-0236-7389"
+title: "Zotero Robust Links Extension: Create Robust Links from within Zotero"
+version: 2.0.0-20210419153723
+date-released: 2021-06-28
+url: "https://github.com/lanl/Zotero-Robust-Links-Extension"
+license-url: "https://github.com/lanl/Zotero-Robust-Links-Extension/blob/main/LICENSE"
