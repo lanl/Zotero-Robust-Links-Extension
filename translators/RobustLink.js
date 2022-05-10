@@ -5,7 +5,7 @@
 	"creator": "Shawn M. Jones",
 	"target": "html",
 	"minVersion": "1.0.*",
-	"maxVersion": "5.0.*",
+	"maxVersion": "6.0.*",
 	"browserSupport": "gcs",
 	"priority": 25,
 	"displayOptions": {
@@ -17,11 +17,17 @@
 }
 
 function doExport(){
+
+	var versionurl;
+	var versiondate;
+	var originalurl;
+	var foundRobustLink = false;
+
     while (item = Zotero.nextItem()) {
-		var foundRobustLink = false;
-		var versionurl;
-		var versiondate;
-		var originalurl;
+        versionurl = null;
+        versiondate = null;
+        originalurl = null;
+        foundRobustLink = false;
 
 		if (item.attachments) {
 			for (let i = 0; i < item.attachments.length; i++) {
@@ -52,7 +58,7 @@ function doExport(){
 		}
 
 		if (foundRobustLink === true) {
-			Zotero.write('<A HREF="'+originalurl+'" data-versionurl="'+versionurl+'" data-versiondate="'+versiondate+'">'+item.title+'</A>\n');
+			Zotero.write('<A HREF="'+originalurl+'" data-versionurl="'+versionurl+'" data-versiondate="'+versiondate+'">'+item.title+'</A><BR>\n');
         }
 	}
 }
